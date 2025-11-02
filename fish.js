@@ -270,7 +270,7 @@ class Fish {
                 // 障害物の中心から魚への方向ベクトルを取得
                 const direction = obstacle.getDirectionFromCenter(this.x, this.y);
 
-                // 距離に反比例する力（近いほど強く離れる）
+                // 距離に応じて線形に変化する力（近いほど強く離れる）
                 const force = (this.avoidanceRadius - distance) / this.avoidanceRadius;
 
                 steerX += direction.x * force;
