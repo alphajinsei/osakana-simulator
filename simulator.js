@@ -14,6 +14,10 @@ class Simulator {
         // 魚の配列
         this.fishes = [];
 
+        // 障害物の配列と有効/無効フラグ
+        this.obstacles = [];
+        this.obstaclesEnabled = true; // true: 障害物あり / false: 障害物なし
+
         // 時間管理
         this.lastTime = performance.now();
 
@@ -48,6 +52,25 @@ class Simulator {
 
         // 魚の数を表示
         this.updateFishCount();
+
+        // 障害物の初期化
+        if (this.obstaclesEnabled) {
+            this.initObstacles();
+        }
+    }
+
+    /**
+     * 障害物を初期化する
+     */
+    initObstacles() {
+        // 中央に大きめの円形障害物を配置
+        this.obstacles.push(new Obstacle(600, 450, 100, 'circle'));
+
+        // 左上に小さめの円形障害物
+        this.obstacles.push(new Obstacle(300, 250, 60, 'circle'));
+
+        // 右下に中サイズの円形障害物
+        this.obstacles.push(new Obstacle(900, 650, 80, 'circle'));
     }
 
     /**
@@ -55,9 +78,12 @@ class Simulator {
      * @param {number} deltaTime - 前フレームからの経過時間(秒)
      */
     updateFishes(deltaTime) {
+        // 障害物データを取得（無効の場合は空配列）
+        const obstacles = this.obstaclesEnabled ? this.obstacles : [];
+
         for (let fish of this.fishes) {
-            // 各魚の座標と速度を更新
-            fish.update(deltaTime, this.width, this.height, this.fishes);
+            // 各魚の座標と速度を更新（障害物データも渡す）
+            fish.update(deltaTime, this.width, this.height, this.fishes, obstacles);
 
             // 速度を制限(暴走防止)
             fish.limitSpeed(150);
@@ -71,9 +97,23 @@ class Simulator {
         // 画面をクリア
         this.ctx.clearRect(0, 0, this.width, this.height);
 
+        // 障害物を先に描画（魚の下に表示）
+        if (this.obstaclesEnabled) {
+            this.drawObstacles();
+        }
+
         // すべての魚を描画
         for (let fish of this.fishes) {
             fish.draw(this.ctx);
+        }
+    }
+
+    /**
+     * すべての障害物を描画する
+     */
+    drawObstacles() {
+        for (let obstacle of this.obstacles) {
+            obstacle.draw(this.ctx);
         }
     }
 

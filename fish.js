@@ -30,6 +30,10 @@ class Fish {
         this.separationWeight = 30;  // 分離の影響力
         this.alignmentWeight = 1.0;   // 整列の影響力
         this.cohesionWeight = 0.5;    // 結合の影響力
+
+        // 障害物回避のパラメータ
+        this.avoidanceRadius = 100;   // 障害物を検知する距離
+        this.avoidanceWeight = 50;    // 回避の影響力（強めに設定）
     }
 
     /**
@@ -38,12 +42,16 @@ class Fish {
      * @param {number} canvasWidth - キャンバスの幅
      * @param {number} canvasHeight - キャンバスの高さ
      * @param {Fish[]} allFish - すべての魚の配列(群体行動用)
+     * @param {Obstacle[]} obstacles - すべての障害物の配列
      */
-    update(deltaTime, canvasWidth, canvasHeight, allFish) {
+    update(deltaTime, canvasWidth, canvasHeight, allFish, obstacles = []) {
         // Boidsアルゴリズムの3つの力を計算
         const sep = this.separation(allFish);
         const ali = this.alignment(allFish);
         const coh = this.cohesion(allFish);
+
+        // 障害物回避の力を計算
+        const avoid = this.avoidObstacles(obstacles);
 
         // 各力に重みを適用して速度に加算
         this.vx += sep.x * this.separationWeight;
@@ -54,6 +62,9 @@ class Fish {
 
         this.vx += coh.x * this.cohesionWeight;
         this.vy += coh.y * this.cohesionWeight;
+
+        this.vx += avoid.x * this.avoidanceWeight;
+        this.vy += avoid.y * this.avoidanceWeight;
 
         // 基本的な移動: 速度を座標に加算
         this.x += this.vx * deltaTime;
@@ -238,5 +249,42 @@ class Fish {
         }
 
         return { x: 0, y: 0 };
+    }
+
+    /**
+     * Avoidance (回避): 障害物から離れる
+     * @param {Obstacle[]} obstacles - すべての障害物の配列
+     * @returns {{x: number, y: number}} 回避のための力ベクトル
+     */
+    avoidObstacles(obstacles) {
+        let steerX = 0;
+        let steerY = 0;
+        let count = 0;
+
+        for (let obstacle of obstacles) {
+            // 障害物との距離を計算
+            const distance = obstacle.distanceToPoint(this.x, this.y);
+
+            // 一定距離内の障害物から離れる
+            if (distance < this.avoidanceRadius) {
+                // 障害物の中心から魚への方向ベクトルを取得
+                const direction = obstacle.getDirectionFromCenter(this.x, this.y);
+
+                // 距離に反比例する力（近いほど強く離れる）
+                const force = (this.avoidanceRadius - distance) / this.avoidanceRadius;
+
+                steerX += direction.x * force;
+                steerY += direction.y * force;
+                count++;
+            }
+        }
+
+        // 平均を取る
+        if (count > 0) {
+            steerX /= count;
+            steerY /= count;
+        }
+
+        return { x: steerX, y: steerY };
     }
 }
