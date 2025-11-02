@@ -27,7 +27,7 @@ class Fish {
         this.alignmentRadius = 50;    // 整列: この距離内の魚と速度を合わせる
         this.cohesionRadius = 50;     // 結合: この距離内の魚の中心に向かう
 
-        this.separationWeight = 30;  // 分離の影響力
+        this.separationWeight = 800;  // 分離の影響力
         this.alignmentWeight = 1.0;   // 整列の影響力
         this.cohesionWeight = 0.5;    // 結合の影響力
 
@@ -158,12 +158,12 @@ class Fish {
 
             // 一定距離内の魚から離れる
             if (distance > 0 && distance < this.separationRadius) {
-                // 離れる方向のベクトル(距離に反比例)
+                // 離れる方向のベクトル
                 const diffX = this.x - other.x;
                 const diffY = this.y - other.y;
 
-                steerX += diffX / distance; // 距離で正規化
-                steerY += diffY / distance;
+                steerX += diffX / (distance * distance); // 距離に反比例するように調整
+                steerY += diffY / (distance * distance);
                 count++;
             }
         }
