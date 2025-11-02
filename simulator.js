@@ -28,7 +28,7 @@ class Simulator {
      * 初期化: 魚を生成する
      */
     init() {
-        const fishCount = 50; // 魚の数
+        const fishCount = 80; // 魚の数
 
         for (let i = 0; i < fishCount; i++) {
             // ランダムな位置
