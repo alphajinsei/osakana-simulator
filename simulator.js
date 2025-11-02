@@ -19,6 +19,9 @@ class Simulator {
 
         // 初期化
         this.init();
+
+        // クリックイベントを設定
+        this.setupClickHandler();
     }
 
     /**
@@ -44,7 +47,7 @@ class Simulator {
         }
 
         // 魚の数を表示
-        document.getElementById('fishCount').textContent = this.fishes.length;
+        this.updateFishCount();
     }
 
     /**
@@ -91,6 +94,48 @@ class Simulator {
 
         // 次のフレームをリクエスト
         requestAnimationFrame(() => this.animate());
+    }
+
+    /**
+     * クリックイベントハンドラを設定する
+     */
+    setupClickHandler() {
+        this.canvas.addEventListener('click', (event) => {
+            // クリック位置を取得
+            const rect = this.canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // クリック位置に新しい魚を追加
+            this.addFish(x, y);
+        });
+    }
+
+    /**
+     * 指定した位置に魚を追加する
+     * @param {number} x - X座標
+     * @param {number} y - Y座標
+     */
+    addFish(x, y) {
+        // ランダムな速度(方向と速さ)
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 50 + Math.random() * 50; // 50-100 ピクセル/秒
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+
+        // 魚を作成して配列に追加
+        const fish = new Fish(x, y, vx, vy);
+        this.fishes.push(fish);
+
+        // 魚の数を更新
+        this.updateFishCount();
+    }
+
+    /**
+     * 魚の数表示を更新する
+     */
+    updateFishCount() {
+        document.getElementById('fishCount').textContent = this.fishes.length;
     }
 
     /**
